@@ -5,9 +5,7 @@ const Header = ({ name }) => {
 }
 
 const Total = ({ parts }) => {
-  console.log(parts)
   var totalAmount = parts.reduce((sum, part) => sum + part.exercises, 0)
-  console.log(totalAmount)
   return (
     <b>total of {totalAmount} exercises</b>
   )
@@ -39,7 +37,3 @@ const Course = ({ course }) => {
   )}
   
 export default Course
-
-//  <ul>
-//  {notes.map(note => <Note key={note.id} note={note} />)}
-// </ul>
