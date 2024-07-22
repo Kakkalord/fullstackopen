@@ -32,7 +32,7 @@ const App = () => {
 
   const personToShow = (persons.some(person => person.name === personExists))
     ? persons.filter(person => person.name === personExists)
-    : ('search...')
+    : ({name: 'search...', number: 0})
 
   // handle changes made to event.target (input)
   const handleNameChange = (event) => {
@@ -57,7 +57,7 @@ const App = () => {
       <h2>Phonebook</h2>
         <div>
           filter: <input value={personExists} onChange={handleFilterChange}/>
-          {personToShow.name}
+          <div>{personToShow.name} {personToShow.number}</div>
         </div>
       <h2>add a new</h2>
       <form onSubmit={addName}>
