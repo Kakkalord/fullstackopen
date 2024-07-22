@@ -7,6 +7,7 @@ const App = () => {
   ]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [personExists, setShowFiltered] = useState('')
 
   // when form submitted
   const addName = (event) => {
@@ -29,20 +30,36 @@ const App = () => {
     }
   }
 
+  const personToShow = (persons.some(person => person.name === personExists))
+    ? persons.filter(person => person.name === personExists)
+    : ('search...')
+
   // handle changes made to event.target (input)
   const handleNameChange = (event) => {
     console.log(event.target.value)
     setNewName(event.target.value)
   }
 
+  // handle changes made to event
   const handleNumberChange = (eventNumber) => {
     console.log(eventNumber.target.value)
     setNewNumber(eventNumber.target.value)
   }
 
+  const handleFilterChange = (eventFilter) => {
+    console.log(eventFilter.target.value)
+    setShowFiltered(eventFilter.target.value)
+
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+        <div>
+          filter: <input value={personExists} onChange={handleFilterChange}/>
+          {personToShow.name}
+        </div>
+      <h2>add a new</h2>
       <form onSubmit={addName}>
         <div>
           name: <input value={newName} onChange={handleNameChange}/>
