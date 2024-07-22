@@ -31,7 +31,7 @@ const App = () => {
   }
 
   const personToShow = (persons.some(person => person.name === personExists))
-    ? persons.filter(person => person.name === personExists)
+    ? persons.filter(person => person.name === personExists)[0]
     : ({name: 'search...', number: 0})
 
   // handle changes made to event.target (input)
