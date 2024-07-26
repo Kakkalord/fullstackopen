@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import SearchFilter from './components/SearchFilter'
 import AddPeople from './components/AddNewPersonsForm'
 import DisplayPersons from './components/DisplayPersons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '0411 222 333', id: 1}
-  ]) 
+  // const [persons, setPersons] = useState([
+  //   { name: 'Arto Hellas', number: '0411 222 333', id: 1}
+  // ]) 
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [showFiltered, setShowFiltered] = useState('')
@@ -24,7 +26,7 @@ const App = () => {
     }
 
     // check if name is already present
-    if (persons.some(person => person.name === newName)) {
+    if (persons.some(person => person.name === newName)) { 
       alert(`${newName} is already added to phonebook`)
     } else {
       setPersons(persons.concat(personObject))
@@ -38,6 +40,18 @@ const App = () => {
   const handleNumberChange = (eventNumber) => {setNewNumber(eventNumber.target.value)}
 
   const handleFilterChange = (eventFilter) => {setShowFiltered(eventFilter.target.value)}
+
+  //fetch db.json
+  useEffect(() => {
+    console.log('use effect ran')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log(response.data, 'promise fulfilled')
+        setPersons(response.data)
+      })
+  }, [])
+  console.log('render', persons.length, 'persons')
 
   return (
     <div>

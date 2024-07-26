@@ -1,7 +1,40 @@
-const App = (props) => {
-  const { notes } = props
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import Note from './components/Note'
 
-  return (
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
+  const [showAll, setShowAll] = useState(true)
+
+useEffect(() => {
+  console.log('useEffect ran')
+  axios
+      .get('http://localhost:3001/notes')
+      .then(response => {
+        console.log('promise fulfilled')
+        setNotes(response.data)
+      })
+}, [])
+console.log('render', notes.length, 'notes')
+
+addNote = event => {
+  event.preventDefault()
+  const noteObject = {
+    content: newNote,
+    important: Math.random() < 0.5,
+  }
+
+  axios
+    .post('http://localhost:3001/notes', noteObject)
+    .then(response => {
+      console.log(response)
+      setNotes(notes.concat(response.data))
+      setNewNote('')
+    })
+}
+
+return (
     <div>
       <h1>Notes</h1>
       <ul>
