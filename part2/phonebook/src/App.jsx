@@ -4,12 +4,14 @@ import SearchFilter from './components/SearchFilter'
 import AddPeople from './components/AddNewPersonsForm'
 import DisplayPersons from './components/DisplayPersons'
 import phonebookService from './services/phonebook'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [showFiltered, setShowFiltered] = useState('')
+  const [message, setMessage] = useState(null)
 
   // Add person to db
   const addName = (event) => {
@@ -37,6 +39,11 @@ const App = () => {
             setNewNumber('')
             setNewName('')
         })
+
+      setMessage(`${person.name}'s number updated successfully`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
       }
 
     } else {
@@ -49,6 +56,10 @@ const App = () => {
         setNewNumber('')
         setNewName('')
       })
+      setMessage(`${newName} added successfully`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
     }
   }
 
@@ -66,7 +77,11 @@ const App = () => {
       .then(updatedPersons => {
         setPersons(updatedPersons)
         console.log(removePerson.name, ' removed from list')
-        })
+      })
+      setMessage(`${removePerson.name} removed successfully`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
     }
   }
 
@@ -91,6 +106,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <SearchFilter persons={persons} showFiltered={showFiltered} handleFilterChange={handleFilterChange}/>
       
       <h2>Add a new</h2>
