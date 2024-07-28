@@ -8,6 +8,7 @@ const App = () => {
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(false)
 
+  // get all 
   useEffect(() => {
     noteService
       .getAll()
@@ -17,10 +18,12 @@ const App = () => {
   }, [])
 
 
+  // toggling importance
   const toggleImportanceOf = id => {
     const note = notes.find(n => n.id === id)
     const changedNote = { ...note, important: !note.important }
 
+    // update id of note with changed note, set new note as a copy but important
     noteService
       .update(id, changedNote)
       .then(returnedNote => {
@@ -28,14 +31,17 @@ const App = () => {
       })
   }
 
-
+  // add note
   const addNote = (event) => {
     event.preventDefault()
+
+    // create new object to hold note object
     const noteObject = {
       content: newNote,
       important: Math.random() > 0.5,
     }
   
+    // create new object
     noteService
       .create(noteObject)
       .then(returnedNote => {
@@ -50,7 +56,6 @@ const App = () => {
       })
   }
   
-    
   const handleNoteChange = (event) => {
     setNewNote(event.target.value)
   }
