@@ -13,6 +13,8 @@ const App = () => {
   const [showFiltered, setShowFiltered] = useState('')
   const [message, setMessage] = useState(null)
 
+  // const messageTimeout = setTimeout(() => {setMessage(null)}, 3000)
+
   // Add person to db
   const addName = (event) => {
     event.preventDefault()
@@ -32,18 +34,17 @@ const App = () => {
         
         const person = persons.find(p => p.name === newName)
 
+        //update phonenumber
         phonebookService
           .update(person.id, personObject)
           .then(returnedPerson => {
             setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
             setNewNumber('')
             setNewName('')
-        })
-
+          })
+        
       setMessage(`${person.name}'s number updated successfully`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 3000)
+      setTimeout(() => {setMessage(null)}, 3000)
       }
 
     } else {
@@ -57,9 +58,7 @@ const App = () => {
         setNewName('')
       })
       setMessage(`${newName} added successfully`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 3000)
+      setTimeout(() => {setMessage(null)}, 3000)
     }
   }
 
@@ -78,10 +77,12 @@ const App = () => {
         setPersons(updatedPersons)
         console.log(removePerson.name, ' removed from list')
       })
+      .catch(error => {
+        setMessage(`${removePerson.name} already removed`)
+        setTimeout(() => {setMessage(null)}, 3000)
+      })
       setMessage(`${removePerson.name} removed successfully`)
-      setTimeout(() => {
-        setMessage(null)
-      }, 3000)
+      setTimeout(() => {setMessage(null)}, 3000)
     }
   }
 
