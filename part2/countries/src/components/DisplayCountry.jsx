@@ -1,35 +1,36 @@
-const Display = ({ countries, showCountry }) => {
+const Display = ({ filterCountries, showCountry, handleShowPress }) => {
   
-    if (countries.length > 10 && showCountry!=='') {
+    if (filterCountries.length > 10 && showCountry!=='') {
       return (
         <div>
           Too many matching searches, please specify other filter...
         </div>
       )
-    } else if (countries.length < 10 && countries.length > 1) {
+    } else if (filterCountries.length < 10 && filterCountries.length > 1) {
       return (
-        countries.map((country) => 
-          <div key={country.cca3}> 
+        filterCountries.map((country) => 
+          <div key={country.name.common}> 
             {country.name.common}
+            <button onClick={() => handleShowPress(country.name.common)}>show</button>
           </div>
         )
       )
-    } else if (countries.length === 1) {
+    } else if (filterCountries.length === 1) {
   
-      const languages = countries[0].languages
+      const languages = filterCountries[0].languages
       const languagesList = Object.values(languages).map(language => (
         <li key={language}>{language}</li>
       ))
   
       return (
         <div>
-          <h1>{countries[0].name.common}</h1>
-          <p>capital: {countries[0].capital[0]}</p>
-          <p>area: {countries[0].area}</p>
+          <h1>{filterCountries[0].name.common}</h1>
+          <p>capital: {filterCountries[0].capital[0]}</p>
+          <p>area: {filterCountries[0].area}</p>
           <h2>languages:</h2>
           {languagesList}
           <picture>
-            <img src={countries[0].flags.png} width="250" height="150"/>
+            <img src={filterCountries[0].flags.png} width="250" height="150"/>
           </picture>
         </div>
       )
