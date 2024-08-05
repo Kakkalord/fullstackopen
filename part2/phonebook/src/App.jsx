@@ -1,15 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import SearchFilter from './components/SearchFilter'
+import AddPeople from './components/AddNewPersonsForm'
+import DisplayPersons from './components/DisplayPersons'
+import phonebookService from './services/phonebook'
+import Notification from './components/Notification'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas',
-      number: '0411 222 333'}
-  ]) 
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
-  const [personExists, setShowFiltered] = useState('')
+  const [showFiltered, setShowFiltered] = useState('')
+  const [message, setMessage] = useState(null)
 
-  // when form submitted
+  // const messageTimeout = setTimeout(() => {setMessage(null)}, 3000)
+
+  // Add person to db
   const addName = (event) => {
     event.preventDefault()
     console.log('button clicked', event.target)
@@ -17,64 +23,100 @@ const App = () => {
     // create new object to hold the person
     const personObject = {
       name: newName,
-      number: newNumber
+      number: newNumber,
     }
 
-    // check if name is already present
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    // check if person present
+    if (persons.some(person => person.name === newName)) { 
+
+      // if true, check if they want to update number
+      if (confirm(`${personObject.name} is already added to the phonebook, replace the number?`)) {
+        
+        const person = persons.find(p => p.name === newName)
+
+        //update phonenumber
+        phonebookService
+          .update(person.id, personObject)
+          .then(returnedPerson => {
+            setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+            setNewNumber('')
+            setNewName('')
+          })
+        
+      setMessage(`${person.name}'s number updated successfully`)
+      setTimeout(() => {setMessage(null)}, 3000)
+      }
+
     } else {
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      // add person to db 
+      phonebookService
+      .create(personObject)
+      .then(returnedPerson => {
+        console.log(returnedPerson)
+        setPersons(persons.concat(returnedPerson))
+        setNewNumber('')
+        setNewName('')
+      })
+      setMessage(`${newName} added successfully`)
+      setTimeout(() => {setMessage(null)}, 3000)
     }
   }
 
-  const personToShow = (persons.some(person => person.name === personExists))
-    ? persons.filter(person => person.name === personExists)[0]
-    : ({name: 'search...', number: 0})
+  // remove person from phonebook
+  const removePersons = (id) => {
+    const removePerson = persons.find(person => person.id === id)
 
-  // handle changes made to event.target (input)
-  const handleNameChange = (event) => {
-    console.log(event.target.value)
-    setNewName(event.target.value)
+    // remove person
+    if (removePerson && confirm(`Delete ${removePerson.name}`)) {
+      console.log(removePerson)
+      console.log(removePerson.id)
+
+      phonebookService
+      .remove(removePerson.id)
+      .then(updatedPersons => {
+        setPersons(updatedPersons)
+        console.log(removePerson.name, ' removed from list')
+      })
+      .catch(error => {
+        setMessage(`${removePerson.name} already removed`)
+        setTimeout(() => {setMessage(null)}, 3000)
+      })
+      setMessage(`${removePerson.name} removed successfully`)
+      setTimeout(() => {setMessage(null)}, 3000)
+    }
   }
 
-  // handle changes made to event
-  const handleNumberChange = (eventNumber) => {
-    console.log(eventNumber.target.value)
-    setNewNumber(eventNumber.target.value)
-  }
+  const handleNameChange = (event) => {setNewName(event.target.value)}
 
-  const handleFilterChange = (eventFilter) => {
-    console.log(eventFilter.target.value)
-    setShowFiltered(eventFilter.target.value)
+  const handleNumberChange = (eventNumber) => {setNewNumber(eventNumber.target.value)}
 
-  }
+  const handleFilterChange = (eventFilter) => {setShowFiltered(eventFilter.target.value)}
+
+  //fetch db.json
+  useEffect(() => {
+    console.log('use effect ran')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log(response.data, 'promise fulfilled')
+        setPersons(response.data)
+      })
+  }, [])
+  console.log('render', persons.length, 'persons')
 
   return (
     <div>
       <h2>Phonebook</h2>
-        <div>
-          filter: <input value={personExists} onChange={handleFilterChange}/>
-          <div>{personToShow.name} {personToShow.number}</div>
-        </div>
-      <h2>add a new</h2>
-      <form onSubmit={addName}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange}/>
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
-        </div>
-        <div>
-          <button type="submit" >add</button>
-        </div>
-      </form>
+      <Notification message={message} />
+      <SearchFilter persons={persons} showFiltered={showFiltered} handleFilterChange={handleFilterChange}/>
+      
+      <h2>Add a new</h2>
+      <AddPeople key={persons.length + 1}
+        addName={addName} newName={newName} handleNameChange={handleNameChange} persons={persons} 
+        newNumber={newNumber} handleNumberChange={handleNumberChange} />
+      
       <h2>Numbers</h2>
-      <div>
-        {persons.map(person => <p key={person.name}>{person.name} {person.number}</p>)}
-      </div>
+      <DisplayPersons persons={persons} removePersons={removePersons}/>
     </div>
   )
 }
