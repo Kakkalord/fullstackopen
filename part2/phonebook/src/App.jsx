@@ -7,10 +7,10 @@ import phonebookService from './services/phonebook'
 import Notification from './components/Notification'
 
 const App = () => {
-  const [persons, setPersons] = useState([])
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
-  const [showFiltered, setShowFiltered] = useState('')
+const [showFiltered, setShowFiltered] = useState('')
   const [message, setMessage] = useState(null)
 
   // const messageTimeout = setTimeout(() => {setMessage(null)}, 3000)
@@ -54,8 +54,8 @@ const App = () => {
       .then(returnedPerson => {
         console.log(returnedPerson)
         setPersons(persons.concat(returnedPerson))
-        setNewNumber('')
-        setNewName('')
+            setNewNumber('')
+    setNewName('')
       })
       setMessage(`${newName} added successfully`)
       setTimeout(() => {setMessage(null)}, 3000)
@@ -110,13 +110,13 @@ const App = () => {
       <Notification message={message} />
       <SearchFilter persons={persons} showFiltered={showFiltered} handleFilterChange={handleFilterChange}/>
       
-      <h2>Add a new</h2>
+        <h2>Add a new</h2>
       <AddPeople key={persons.length + 1}
         addName={addName} newName={newName} handleNameChange={handleNameChange} persons={persons} 
         newNumber={newNumber} handleNumberChange={handleNumberChange} />
-      
+
       <h2>Numbers</h2>
-      <DisplayPersons persons={persons} removePersons={removePersons}/>
+<DisplayPersons persons={persons} removePersons={removePersons}/>
     </div>
   )
 }
