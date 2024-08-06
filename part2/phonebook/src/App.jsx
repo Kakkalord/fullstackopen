@@ -95,12 +95,11 @@ const App = () => {
   //fetch db.json
   useEffect(() => {
     console.log('use effect ran')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log(response.data, 'promise fulfilled')
-        setPersons(response.data)
-      })
+    phonebookService
+    .getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
+    })
   }, [])
   console.log('render', persons.length, 'persons')
 
