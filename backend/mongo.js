@@ -7,12 +7,12 @@ if (process.argv.length<3) {
 
 const password = process.argv[2]
 
-const url =
+const uri =
   `mongodb+srv://wangc1012097:${password}@fso-cluster.0wzstrv.mongodb.net/?retryWrites=true&w=majority&appName=FSO-Cluster`
 
 mongoose.set('strictQuery',false)
 
-mongoose.connect(url)
+mongoose.connect(uri)
 
 const noteSchema = new mongoose.Schema({
   content: String,
