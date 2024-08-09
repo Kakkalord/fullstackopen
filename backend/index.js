@@ -6,8 +6,7 @@ const mongoose = require('mongoose')
 const password = process.argv[2]
 
 // DO NOT SAVE YOUR PASSWORD TO GITHUB!!
-const url =
-  `mongodb+srv://fullstack:${password}@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority`
+const url = "mongodb+srv://wangc1012097:F7KsGKEBL5HdFo9V@fso-cluster.0wzstrv.mongodb.net/?retryWrites=true&w=majority&appName=FSO-Cluster";
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url)
@@ -64,7 +63,13 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({})
+    .then(notes => {
+      response.json(notes)
+    })
+    .catch(error => {
+      console.log(error.message)
+    })
 })
 
 const generateId = () => {
