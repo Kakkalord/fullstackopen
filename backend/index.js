@@ -4,11 +4,11 @@ require('dotenv').config()
 
 const Note = require('./models/note')
 
-let notes = [
-]
+let notes = []
 
 app.use(express.static('dist'))
 
+// middleware
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
@@ -32,6 +32,7 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// get all notes
 app.get('/api/notes', (request, response) => {
   Note.find({}).then(notes => {
     response.json(notes)
@@ -55,6 +56,7 @@ app.post('/api/notes', (request, response) => {
   })
 })
 
+// get note by id
 app.get('/api/notes/:id', (request, response) => {
   Note.findById(request.params.id).then(note => {
     response.json(note)
