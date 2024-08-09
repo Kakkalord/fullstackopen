@@ -6,10 +6,23 @@ require('dotenv').config()
 
 const Person = require('./model/person')
 const person = require('./models/person')
+const { nextTick } = require('process')
 
 morgan.token('body', req => {
   return JSON.stringify(req.body)
 })
+
+// error handler middleware
+
+const errorHandler = (error, request, reponse, next) => {
+  console.log(error)
+
+  if (error.name === 'CastError') {
+    return express.response.status(400).send({error: 'Malformed syntax'})
+  }
+
+  next (error)
+}
 
 app.use(express.json())
 app.use(morgan('tiny'))
@@ -91,13 +104,17 @@ app.post('/api/persons/:id', (request,response) => {
     }
   )
 
+  // delete person from db
   app.delete('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    notes = persons.filter(person => person.id !== id)
-  
-    response.status(204).end()
+    Person.findByIdAndDelete(request.params.id)
+      .then(noteToDelete => {
+        response.status(204).end()
+      })
+      .catch(error => next(error))
   })  
 })
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
