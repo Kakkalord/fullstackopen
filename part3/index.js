@@ -19,6 +19,8 @@ const errorHandler = (error, request, reponse, next) => {
 
   if (error.name === 'CastError') {
     return express.response.status(400).send({error: 'Malformed syntax'})
+  } else if (error.name === 'ValidationError') {
+    return express.response.status(400).json({error: error.message})
   }
 
   next (error)
@@ -72,37 +74,59 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 // save person to database
-app.post('/api/persons/:id', (request,response) => {
+app.post('/api/persons/', (request,response) => {
   const {name, number} = request.body
   
+  // check valid post request
   if (!name || !number) {
     return (response.status(400).json({
       error: 'content missing'
     }))
   }
 
-  // querie DB to find one
-  Person.findOne({name: name})
-  .then(personExists => {
+  // check if person exists
+  Person.findOne({ name: name })
+    .then(personExists => {
+
+    // if person exists, update phone number
+    // ???HELP - how do i update someone's number. I should be using put instead of post right?
     if (personExists) {
-      return response.status(403).json({
-        error: 'person exists already'
+      personExists.number = number  
+      personExists.save()
+        .then(savedPerson => { 
+          response.json(savedPerson)
+        })
+    } else {
+      // create new person
+      const person = new Person({
+        name,
+        number
       })
-    }
+  
+      // save person to DB
+      person.save()
+        .then(savedPerson => {
+          response.json(savedPerson)
+        })
+        .catch(error => next(error))
+      }
+  })
 
-    // create new person
-    person = new Person({
-      name,
-      number
-    })
-
-    // save person to DB
-    person.save()
-      .then(savedPerson => {
-        response.json(savedPerson)
+  // update person's number. 
+  app.put('/api/person/:id', (request, response, next) => {
+    const { name, number } = request.body
+  
+    Person.findByIdAndUpdate(
+      request.params.id, 
+      { name, number },
+      { new: true, runValidators: true, context: 'query' }
+    ) 
+      .then(updatedPerson => {
+        response.json(updatedPerson)
       })
-    }
-  )
+      .catch(error => next(error))
+  })
+
 
   // delete person from db
   app.delete('/api/persons/:id', (request, response) => {
