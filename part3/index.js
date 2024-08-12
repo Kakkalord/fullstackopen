@@ -5,8 +5,6 @@ const cors = require('cors')
 require('dotenv').config()
 
 const Person = require('./model/person')
-const person = require('./models/person')
-const { nextTick } = require('process')
 
 morgan.token('body', req => {
   return JSON.stringify(req.body)
@@ -18,9 +16,9 @@ const errorHandler = (error, request, reponse, next) => {
   console.log(error)
 
   if (error.name === 'CastError') {
-    return express.response.status(400).send({error: 'Malformed syntax'})
+    return express.response.status(400).send({ error: 'Malformed syntax' })
   } else if (error.name === 'ValidationError') {
-    return express.response.status(400).json({error: error.message})
+    return express.response.status(400).json({ error: error.message })
   }
 
   next (error)
@@ -48,11 +46,11 @@ app.get('/info', (request, response) => {
   response.send(info(persons))
 })
 
-const generateRandomId = () => {
-  return (
-    Math.floor(Math.random() * 1000)
-  )
-}
+// const generateRandomId = () => {
+//   return (
+//     Math.floor(Math.random() * 1000)
+//   )
+// }
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello Clarence!</h1>')
@@ -75,8 +73,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 // save person to database
 app.post('/api/persons/', (request,response) => {
-  const {name, number} = request.body
-  
+  const { name, number } = request.body
   // check valid post request
   if (!name || !number) {
     return (response.status(400).json({
@@ -88,39 +85,38 @@ app.post('/api/persons/', (request,response) => {
   Person.findOne({ name: name })
     .then(personExists => {
 
-    // if person exists, update phone number
-    // ???HELP - how do i update someone's number. I should be using put instead of post right?
-    if (personExists) {
-      personExists.number = number  
-      personExists.save()
-        .then(savedPerson => { 
-          response.json(savedPerson)
+      // if person exists, update phone number
+      // ???HELP - how do i update someone's number. I should be using put instead of post right?
+      if (personExists) {
+        personExists.number = number
+        personExists.save()
+          .then(savedPerson => {
+            response.json(savedPerson)
+          })
+      } else {
+        // create new person
+        const person = new Person({
+          name,
+          number
         })
-    } else {
-      // create new person
-      const person = new Person({
-        name,
-        number
-      })
-  
-      // save person to DB
-      person.save()
-        .then(savedPerson => {
-          response.json(savedPerson)
-        })
-        .catch(error => next(error))
-      }
-  })
 
-  // update person's number. 
+        // save person to DB
+        person.save()
+          .then(savedPerson => {
+            response.json(savedPerson)
+          })
+          .catch(error => next(error))
+      }})
+
+  // update person's number.
   app.put('/api/person/:id', (request, response, next) => {
     const { name, number } = request.body
-  
+
     Person.findByIdAndUpdate(
-      request.params.id, 
+      request.params.id,
       { name, number },
       { new: true, runValidators: true, context: 'query' }
-    ) 
+    )
       .then(updatedPerson => {
         response.json(updatedPerson)
       })
@@ -135,9 +131,8 @@ app.post('/api/persons/', (request,response) => {
         response.status(204).end()
       })
       .catch(error => next(error))
-  })  
+  })
 })
-
 app.use(errorHandler)
 
 const PORT = process.env.PORT
