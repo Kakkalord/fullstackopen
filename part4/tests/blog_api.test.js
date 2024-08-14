@@ -61,3 +61,28 @@ test('making HTTP Post successfully creates new blog post', async () => {
     const titles = response.map(blog => blog.title)
     assert(titles.includes(newBlog.title))
 })
+
+test('likes default 0 if none included in post', async () => {
+    // create new blog without likes
+    const noLikesBlog = {
+        _id: "5a422b891b54a676234d17fa",
+        title: "First class tests",
+        author: "Robert C. Martin",
+        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+        __v: 0
+    }
+
+    // post and save
+    await api
+        .post('/api/blogs')
+        .send(noLikesBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    // get THAT post
+    const newBlogs = await api.get('/api/blogs/')
+    const newAddedBlog = newBlogs.find(blog => blog.title === "First class tests")
+
+    // assert likes === 0
+    assert.strictEqual(newAddedBlog.likes, 0)
+})
