@@ -1,4 +1,4 @@
-const { test, beforeEach } = require('node:test')
+const { test, beforeEach, after } = require('node:test')
 const assert = require('node:assert')
 const supertest = require('supertest')
 const mongoose = require('mongoose')
@@ -104,4 +104,22 @@ test('post returns 400 Bad Request', async() => {
 
     assert.strictEqual(response.body.error, 'Bad Request')
 
+})
+
+test('success with deleting single post', async () => {
+    const blogsAtStart = helper.getAllBlogs()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(204)
+
+    const blogsAtEnd = helper.getAllBlogs()
+
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+    assert(blogsAtEnd.map(blog => blog.title).contains(!blogToDelete.title))
+})
+
+after(async () => {
+    await mongoose.connection.close()
 })
