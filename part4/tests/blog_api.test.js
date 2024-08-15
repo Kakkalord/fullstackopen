@@ -86,3 +86,22 @@ test('likes default 0 if none included in post', async () => {
     // assert likes === 0
     assert.strictEqual(newAddedBlog.likes, 0)
 })
+
+test('post returns 400 Bad Request', async() => {
+    const newBlog = {
+        _id: "5a422b891b54a676234d17fa",
+        author: "Robert C. Martin",
+        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+        likes: 10,
+        __v: 0
+    }
+
+    // send blog to '/api/blogs'
+    const response = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+
+    assert.strictEqual(response.body.error, 'Bad Request')
+
+})

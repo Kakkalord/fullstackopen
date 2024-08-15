@@ -14,6 +14,13 @@ blogRouter.get('/api/blogs', (request, response) => {
 })
 
 blogRouter.post('/api/blogs', (request, response) => {
+// validating if no url or 
+  const { title, url } = request.body
+
+  if (!title || !url) {
+    response.status(400).json({error: 'Bad Request'})
+  }
+
   const blog = new Blog(request.body)
 
   blog
