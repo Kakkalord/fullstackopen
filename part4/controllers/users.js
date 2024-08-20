@@ -22,9 +22,11 @@ userRouter.post('/api/users', async (request, response) => {
 
 })
 
-userRouter.get('/', async (request, response) => {
+userRouter.get('/api/users', async (request, response) => {
     // get all users from db
-    const allUsers = await Users.find({}, 'username name')
+    const allUsers = await Users
+        .find({}, { username: 1, name: 1, id: 1 })
+        .populate('blogs')
 
     return response.status(200).json(allUsers)
 })

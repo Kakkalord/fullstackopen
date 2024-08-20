@@ -1,20 +1,20 @@
 const blogRouter = require('express').Router()
 const blog = require('../models/blog')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 blogRouter.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
 
-blogRouter.get('/api/blogs', (request, response) => {
-  Blog
-    .find({})
-    .then(blogs => {
-      response.json(blogs)
-    })
+blogRouter.get('/api/blogs', async (request, response) => {
+  const blogs = await Blog
+    .find({}).populate('user', { username: 1, name: 1 })
+  
+  return response.json(blogs)
 })
 
-blogRouter.post('/api/blogs', (request, response) => {
+blogRouter.post('/api/blogs', async (request, response) => {
 // validating if no url or 
   const { title, url } = request.body
 
@@ -22,13 +22,25 @@ blogRouter.post('/api/blogs', (request, response) => {
     response.status(400).json({error: 'Bad Request'})
   }
 
-  const blog = new Blog(request.body)
+  
+  const usersArray = User.find({})
 
-  blog
+  let user;
+  if (usersArray.length > 0) {
+    user = usersArray[0]
+  } else {
+    return response.status(400).json({ error: 'No Users Found' })
+  }
+
+  const blog = new Blog({
+    ...request.body,
+    user: user
+  })
+
+  await blog
     .save()
-    .then(result => {
-      response.status(201).json(result)
-    })
+
+  return response.status(201).json(result)
 })
 
 blogRouter.delete('/api/blogs/:id', async (request, response) => {
