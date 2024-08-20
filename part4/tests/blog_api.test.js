@@ -127,15 +127,21 @@ after(async () => {
     await mongoose.connection.close()
 })
 
+
+
+// USER TESTS:
+
+const userBeforeEach = async () => {
+    await User.deleteMany({})
+  
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+
+    await user.save()
+}
+
 describe('when there is initially one user in db', () => {
-    beforeEach(async () => {
-      await User.deleteMany({})
-  
-      const passwordHash = await bcrypt.hash('sekret', 10)
-      const user = new User({ username: 'root', passwordHash })
-  
-      await user.save()
-    })
+    userBeforeEach()
   
     test('creation succeeds with a fresh username', async () => {
       const usersAtStart = await helper.usersInDb()
@@ -158,4 +164,55 @@ describe('when there is initially one user in db', () => {
       const usernames = usersAtEnd.map(u => u.username)
       assert(usernames.includes(newUser.username))
     })
-  })
+})
+
+describe('invalid users are not created', () => {
+    userBeforeEach()
+
+    test('create user with same name should error', async() => {
+        const usersAtStart = await helper.usersInDb()
+
+        const invalidUser = {
+            username: 'root',
+            name: 'Matti',
+            password: 'salainen'
+        }
+
+        const response = await api
+            .post('/api/users')
+            .send(invalidUser)
+            .expect(400)
+
+        assert.strictEqual(response.body.error, 'expected `username` to be unique')
+    })
+
+    test('create user without password', async () => {
+        const invalidUser = {
+            username: 'matti',
+            name: 'Matt'
+        }
+
+        const response = await api
+            .post('/api/users')
+            .send(invalidUser)
+            .expect(400)
+        
+        assert.strictEqual(response.body.error, 'Bad Request')
+    })
+
+    test('create password < 3 characters', async () => {
+        const invalidUser = {
+            username: 'Matti',
+            name: 'matt',
+            password: '1'
+        }
+
+        const response = await api
+            .post('/api/users')
+            .send(invalidUser)
+            .expect(400)
+
+        assert.strictEqual(response.body.error, 'Bad Request')
+
+    })
+})
