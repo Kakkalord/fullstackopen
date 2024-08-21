@@ -1,16 +1,10 @@
 const blogRouter = require('express').Router()
+const { nextTick } = require('process')
 const blog = require('../models/blog')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
-
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
+const middleware = require('../utils/middleware')
 
 blogRouter.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
@@ -23,7 +17,7 @@ blogRouter.get('/', async (request, response) => {
   return response.json(blogs)
 })
 
-blogRouter.post('/', async (request, response) => {
+blogRouter.post('/', middleware.userExtractor, async (request, response) => {
 // validating if no url or 
   const { title, url } = request.body
 
@@ -31,11 +25,7 @@ blogRouter.post('/', async (request, response) => {
     response.status(400).json({error: 'Bad Request'})
   }
 
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: 'token invalid' })
-  }
-  const user = await User.findById(decodedToken.id)
+  const user = request.user
 
   const blog = new Blog({
     ...request.body,
@@ -48,10 +38,22 @@ blogRouter.post('/', async (request, response) => {
   return response.status(201).json(result)
 })
 
-blogRouter.delete('/:id', async (request, response) => {
+
+blogRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
+  
+  // find the blog using request.params.id
+  const blog = await Blog.findById(request.params.id)
+
+  // validate request.token with users token
+  if (blog.user.toString() !== request.user._id.toString()) {
+    return response.status(403).json({ error: 'forbidden' })
+  }
+
+  // if correct, delete blog
   await Blog.findByIdAndDelete(request.params.id)
   response.status(204).end()
 })
+
 
 blogRouter.put('/:id', async (request, response) => {
   const blog = request.body
