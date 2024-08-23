@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import CreateBlog from './components/CreateBlog'
+import BlogForm from './components/BlogForm'
 import Login from './components/Login'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -60,8 +61,9 @@ const App = () => {
   }
 
     // add new blog to existing blogs
-  const createBlog = ({ newBlog }) => {
-    setBlogs([...blogs, newBlog])
+  const addBlog = async ({ newBlog }) => {
+    const createdBlog = await blogService.create(newBlog)
+    setBlogs(blogs.concat(createdBlog))
   }
   
   const createBlogForm = () => {
@@ -74,7 +76,7 @@ const App = () => {
           <button onClick={() => setNewNoteVisible(true)}>New Blog</button>
         </div>
         <div style={showWhenVisible}>
-          <CreateBlog createBlog={createBlog}/>
+          <BlogForm createBlog={addBlog}/>
           <button onClick={() => setNewNoteVisible(false)}>cancel</button>
         </div>
       </div>
@@ -102,6 +104,7 @@ const App = () => {
         {createBlogForm()}
       </div>
 
+      
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
