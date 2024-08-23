@@ -10,11 +10,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-
-  // add new blog to existing blogs
-  const createBlog = ({ newBlog }) => {
-    setBlogs([...blogs, newBlog])
-  }
+  const [newNoteVisible, setNewNoteVisible] = useState(false)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -63,6 +59,28 @@ const App = () => {
     setUser(null)
   }
 
+    // add new blog to existing blogs
+  const createBlog = ({ newBlog }) => {
+    setBlogs([...blogs, newBlog])
+  }
+  
+  const createBlogForm = () => {
+    const hideWhenVisible = { display: newNoteVisible ? 'none' : '' }
+    const showWhenVisible = { display: newNoteVisible ? '' : 'none' }
+
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setNewNoteVisible(true)}>New Blog</button>
+        </div>
+        <div style={showWhenVisible}>
+          <CreateBlog createBlog={createBlog}/>
+          <button onClick={() => setNewNoteVisible(false)}>cancel</button>
+        </div>
+      </div>
+    )
+  }
+
   if (user === null) {
     return (
       <Login 
@@ -80,7 +98,9 @@ const App = () => {
       <p>{username} logged in</p>
       <button type="submit" onSubmit={handleLogout}>logout</button>
 
-      <CreateBlog createBlog={createBlog}/>
+      <div>
+        {createBlogForm()}
+      </div>
 
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
